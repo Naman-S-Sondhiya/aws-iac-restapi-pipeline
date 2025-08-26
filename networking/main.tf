@@ -12,7 +12,7 @@ resource "aws_internet_gateway" "my_igw" {
     }
 }
 
-resource "aws_subnet" "my_pub_subnet" {
+resource "aws_subnet" "my_pub_subnets" {
     count = length(var.public_subnet_cidrs)
     vpc_id = aws_vpc.my_vpc.id
     cidr_block = element(var.public_subnet_cidrs, count.index)
@@ -23,7 +23,7 @@ resource "aws_subnet" "my_pub_subnet" {
     }
 }
 
-resource "aws_subnet" "my_priv_subnet" {
+resource "aws_subnet" "my_priv_subnets" {
     count = length(var.private_subnet_cidrs)
     vpc_id = aws_vpc.my_vpc.id
     cidr_block = element(var.private_subnet_cidrs, count.index)
@@ -32,4 +32,21 @@ resource "aws_subnet" "my_priv_subnet" {
     tags = {
         Name = "my-private-subnet-${count.index + 1}"    
     }
+}
+
+resource "aws_route_table" "my_pub_rt" {
+    vpc_id = aws_vpc.my_vpc.id
+    route {
+        cidr_block = "0.0.0.0/0"
+        gateway_id = aws_internet_gateway.my_igw.id
+    }
+    tags = {
+        Name = "my-public-rt"
+    }  
+}
+
+resource "aws_route_table_association" "my_pub_rt_assoc" {
+    count = length(aws_subnet.my_pub_subnets)
+    subnet_id = aws_subnet.my_pub_subnets[count.index].id
+    route_table_id = aws_route_table.my_pub_rt.id
 }
