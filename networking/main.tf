@@ -15,12 +15,10 @@ resource "aws_subnet" "my_dev_subnet" {
     }   
 }
 
-resource "aws_subnet" "m"
+resource "aws_subnet" "m" {
 resource "internet_gateway" "my_igw" {
     vpc_id = aws_vpc.my_dev_vpc.id
     tags = {
         Name = "igw_ap_south"
     }
-
- 
 }
