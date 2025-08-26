@@ -1,24 +1,35 @@
-resource "aws_vpc" "my_dev_vpc" {
+resource "aws_vpc" "my_vpc" {
     cidr_block = var.vpc_cidr
-    tags = [
-        Name = "my_dev_vpc_ap_south"
-    ]
+    tags = {
+        Name = "my-vpc-ap-south"
+    }
 }
 
-resource "aws_subnet" "my_dev_subnet" {
-    count          = length(var.subnet_count)
-    vpc_id           = aws_vpc.my_dev_vpc.id
-    cidr_block        = length(var.subnet_cidr)
-    availability_zone = element(ap-south-1a"
+resource "aws_internet_gateway" "my_igw" {
+    vpc_id = aws_vpc.my_vpc.id
     tags = {
-        Name = "my_dev_subnet_ap_south_1a"
-    }   
+        Name = "igw-ap-south"
+    }
 }
 
-resource "aws_subnet" "m" {
-resource "internet_gateway" "my_igw" {
-    vpc_id = aws_vpc.my_dev_vpc.id
+resource "aws_subnet" "my_pub_subnet" {
+    count = length(var.public_subnet_cidrs)
+    vpc_id = aws_vpc.my_vpc.id
+    cidr_block = element(var.public_subnet_cidrs, count.index)
+    availability_zone = element(var.availability_zones, count.index)
+
     tags = {
-        Name = "igw_ap_south"
+        Name = "my-public-subnet-${count.index + 1}"    
+    }
+}
+
+resource "aws_subnet" "my_priv_subnet" {
+    count = length(var.private_subnet_cidrs)
+    vpc_id = aws_vpc.my_vpc.id
+    cidr_block = element(var.private_subnet_cidrs, count.index)
+    availability_zone = element(var.availability_zones, count.index)
+
+    tags = {
+        Name = "my-private-subnet-${count.index + 1}"    
     }
 }
